@@ -5,11 +5,15 @@ import (
 	"fmt"
 	"os"
 	"strings"
+	"github.com/Rob-Sanchez-Cs/Go-Pokedex/internal/pokecache"
+	"time"
 )
 
 func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 	var mainConfig config
+
+	cache := pokecache.NewCache(1 * time.Minute)
 
 	fmt.Print("Pokedex > ")
 	for scanner.Scan() {
@@ -19,7 +23,7 @@ func main() {
 		if !exists {
 			fmt.Println("Unknown command")
 		} else {
-			errorReturned := cliCommand.callback(&mainConfig)
+			errorReturned := cliCommand.callback(&mainConfig, cache)
 			if errorReturned != nil {
 				fmt.Println(errorReturned)
 			}

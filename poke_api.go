@@ -1,18 +1,34 @@
 package main
 
 import (
-	"fmt"
-	"net/http"
-	"io"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
+	"net/http"
+
+	"github.com/Rob-Sanchez-Cs/Go-Pokedex/internal/pokecache"
 )
 
-func getMaps(mapsResponse *getMapResponse, mainConfig *config, usePreviousUrl bool) error{
+func getMaps(mapsResponse *getMapResponse, mainConfig *config, usePreviousUrl bool, cache *pokecache.Cache) error{
 	var res *http.Response
 	var err error
 
-	res, err = fetchLocationAreas(mainConfig, usePreviousUrl)
+	apiURL := determineUrlForArea(mainConfig, usePreviousUrl)
+	if apiURL == "" {
+		return errors.New("you're on the first page")
+	}
+
+	cacheEntry, found := cache.Get(apiURL)
+	if found {
+		err = json.Unmarshal(cacheEntry, mapsResponse)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	res, err = fetchLocationAreas(apiURL)
 
 	if err != nil {
 		return err
@@ -31,21 +47,26 @@ func getMaps(mapsResponse *getMapResponse, mainConfig *config, usePreviousUrl bo
 	if err != nil {
 		return err
 	}
+	cache.Add(apiURL, body)
 	return nil
 }
 
-func fetchLocationAreas(mainConfig *config, usePreviousUrl bool) (*http.Response, error) {
+func fetchLocationAreas(url string) (*http.Response, error) {
+	return http.Get(url)
+}
+
+func determineUrlForArea(mainConfig *config, usePreviousUrl bool) string {
 	if usePreviousUrl {
 		if mainConfig.Previous == "" {
-			return nil, errors.New("you're on the first page")
+			return ""
 		} else {
-			return http.Get(mainConfig.Previous)
+			return mainConfig.Previous
 		}
 	} else {
 		if mainConfig.Next == "" {
-			return http.Get("https://pokeapi.co/api/v2/location-area")
+			return "https://pokeapi.co/api/v2/location-area"
 		} else {
-			return http.Get(mainConfig.Next)
+			return mainConfig.Next
 		}
 	}
 }

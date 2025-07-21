@@ -1,9 +1,12 @@
 package main
 
+import "github.com/Rob-Sanchez-Cs/Go-Pokedex/internal/pokecache"
+
+
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(mainConfig *config) error
+	callback    func(mainConfig *config, cache *pokecache.Cache) error
 }
 
 type LocationArea struct {
