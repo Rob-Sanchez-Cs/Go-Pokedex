@@ -19,11 +19,17 @@ func main() {
 	for scanner.Scan() {
 		userInput := cleanInput(scanner.Text())
 		enteredCommand := userInput[0]
+		var parameter string
+		if len(userInput) < 2 {
+			parameter = ""
+		} else {
+			parameter = userInput[1]
+		}
 		cliCommand, exists := getCommands()[enteredCommand]
 		if !exists {
 			fmt.Println("Unknown command")
 		} else {
-			errorReturned := cliCommand.callback(&mainConfig, cache)
+			errorReturned := cliCommand.callback(&mainConfig, cache, parameter)
 			if errorReturned != nil {
 				fmt.Println(errorReturned)
 			}
@@ -54,6 +60,11 @@ func getCommands() map[string]cliCommand {
 			name:        "mapb",
 			description: "Displays the names of the previous 20 location areas in the Pokemon world.\nSubsequent calls will display the previous 20 locations.",
 			callback:    commandMapBack,
+		},
+		"explore": {
+			name:        "explore",
+			description: "Takes a location area as an argument. Displays a list of all Pokemon located there.",
+			callback:    commandExplore,
 		},
 	}
 }

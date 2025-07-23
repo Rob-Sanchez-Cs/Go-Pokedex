@@ -70,3 +70,46 @@ func determineUrlForArea(mainConfig *config, usePreviousUrl bool) string {
 		}
 	}
 }
+
+func exploreLocation(exploreResponse *getExploreResponse,cache *pokecache.Cache, parameter string) error {
+	var res *http.Response
+	var err error
+
+	exploreApiUrl := constructExploreUrl(parameter)
+
+	cacheEntry, found := cache.Get(exploreApiUrl)
+	if found {
+		err = json.Unmarshal(cacheEntry, exploreResponse)
+		if err != nil {
+			return err
+		}
+		return nil
+	}
+
+	res, err = http.Get(exploreApiUrl)
+
+	if err != nil {
+		return err
+	} 
+
+	body, err := io.ReadAll(res.Body)
+	res.Body.Close()
+	if res.StatusCode > 299 {
+		return fmt.Errorf("response failed with status code: %v and body: %s", res.StatusCode, body)
+	}
+	if err != nil {
+		return err
+	}
+
+	err = json.Unmarshal(body, exploreResponse)
+	if err != nil {
+		return err
+	}
+	cache.Add(exploreApiUrl, body)
+	return nil
+
+}
+
+func constructExploreUrl(parameter string) string{
+	return "https://pokeapi.co/api/v2/location-area/" + parameter
+}
