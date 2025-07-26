@@ -131,3 +131,12 @@ func commandInspect(mainConfig *config, cache *pokecache.Cache, myPokedex *poked
 	}
 	return nil
 }
+
+func commandPokedex(mainConfig *config, cache *pokecache.Cache, myPokedex *pokedex.Pokedex, parameter string) error {
+
+	fmt.Println("Your Pokedex:")
+	for _, key := range myPokedex.Keys() {
+		fmt.Printf(" - %v\n", key)
+	}
+	return nil
+}
