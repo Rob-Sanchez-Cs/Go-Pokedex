@@ -100,7 +100,7 @@ func commandCatch(mainConfig *config, cache *pokecache.Cache, myPokedex *pokedex
 
 	if catchChance >= randomRoll {
 		fmt.Println(parameter+" was caught!")
-		pokemon, found := myPokedex.Get(parameter)
+		_, found := myPokedex.Get(parameter)
 		if !found {
 			myPokedex.Add(parameter, pokemon)
 		}
@@ -109,5 +109,25 @@ func commandCatch(mainConfig *config, cache *pokecache.Cache, myPokedex *pokedex
 	}
 
 
+	return nil
+}
+
+func commandInspect(mainConfig *config, cache *pokecache.Cache, myPokedex *pokedex.Pokedex, parameter string) error {
+	pokemon, found := myPokedex.Get(parameter)
+	if !found {
+		return errors.New("you have not caught that pokemon")
+	}
+
+	fmt.Println("Name: "+parameter)
+	fmt.Printf("Height: %v\n", pokemon.Height)
+	fmt.Printf("Weight: %v\n", pokemon.Weight)
+	fmt.Println("Stats:")
+	for _, stat := range pokemon.Stats{
+		fmt.Printf("  -%v: %v\n", stat.Stat.Name, stat.BaseStat)
+	}
+	fmt.Println("Types:")
+	for _, myType := range pokemon.Types{
+		fmt.Printf("  - %v\n", myType.Type.Name)
+	}
 	return nil
 }
