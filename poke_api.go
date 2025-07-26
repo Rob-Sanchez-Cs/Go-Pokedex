@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-
+	"github.com/Rob-Sanchez-Cs/Go-Pokedex/internal/pokedex"
 	"github.com/Rob-Sanchez-Cs/Go-Pokedex/internal/pokecache"
 )
 
@@ -91,6 +91,9 @@ func exploreLocation(exploreResponse *getExploreResponse,cache *pokecache.Cache,
 	if err != nil {
 		return err
 	} 
+	if res.StatusCode == http.StatusNotFound {
+		return fmt.Errorf("'%v' is not a valid location", parameter)
+	}
 
 	body, err := io.ReadAll(res.Body)
 	res.Body.Close()
@@ -112,4 +115,20 @@ func exploreLocation(exploreResponse *getExploreResponse,cache *pokecache.Cache,
 
 func constructExploreUrl(parameter string) string{
 	return "https://pokeapi.co/api/v2/location-area/" + parameter
+}
+
+func getPokemon(parameter string, pokemon *pokedex.Pokemon) error {
+	resp, err := http.Get("https://pokeapi.co/api/v2/pokemon/"+parameter)
+    if err != nil {
+        return err
+    }
+	if resp.StatusCode == http.StatusNotFound {
+		return errors.New("'"+parameter+"' is not a Pokemon")
+	}
+    defer resp.Body.Close()
+
+    if err := json.NewDecoder(resp.Body).Decode(pokemon); err != nil {
+        return err
+    }
+	return nil
 }

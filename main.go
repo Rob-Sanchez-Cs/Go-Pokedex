@@ -6,6 +6,7 @@ import (
 	"os"
 	"strings"
 	"github.com/Rob-Sanchez-Cs/Go-Pokedex/internal/pokecache"
+	"github.com/Rob-Sanchez-Cs/Go-Pokedex/internal/pokedex"
 	"time"
 )
 
@@ -14,6 +15,8 @@ func main() {
 	var mainConfig config
 
 	cache := pokecache.NewCache(1 * time.Minute)
+
+	pokedex := pokedex.NewPokedex()
 
 	fmt.Print("Pokedex > ")
 	for scanner.Scan() {
@@ -29,7 +32,7 @@ func main() {
 		if !exists {
 			fmt.Println("Unknown command")
 		} else {
-			errorReturned := cliCommand.callback(&mainConfig, cache, parameter)
+			errorReturned := cliCommand.callback(&mainConfig, cache, pokedex, parameter)
 			if errorReturned != nil {
 				fmt.Println(errorReturned)
 			}
@@ -65,6 +68,11 @@ func getCommands() map[string]cliCommand {
 			name:        "explore",
 			description: "Takes a location area as an argument. Displays a list of all Pokemon located there.",
 			callback:    commandExplore,
+		},
+		"catch": {
+			name:        "catch",
+			description: "Takes the name of a pokemon as an argument.\nAttempt to catch the named pokemon.",
+			callback:    commandCatch,
 		},
 	}
 }
