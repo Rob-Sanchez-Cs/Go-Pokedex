@@ -62,3 +62,13 @@ func (c *Pokedex) Get(key string) (Pokemon, bool) {
 
 	return pokemon, true
 }
+
+func (p *Pokedex) Keys() []string {
+    p.mu.RLock()
+    defer p.mu.RUnlock()
+    keys := make([]string, 0, len(p.data))
+    for k := range p.data {
+        keys = append(keys, k)
+    }
+    return keys
+}
